@@ -76,7 +76,7 @@ if (!$data) {
 
         @media print {
             .output {
-                display: block !important;
+                display: none !important;
             }
             .no-print {
             display: none !important;
