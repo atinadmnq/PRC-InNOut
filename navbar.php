@@ -51,19 +51,20 @@
     }
 
     .btn-logout {
-      background-color: #3E96F4; 
-      color: #FFFFFF; 
+      color: #ffffffff; 
       padding: 7px 0px;
       border: none;
-      margin-top: 250px;
+      margin-top: 20px;
       width: 100%;
       font-family: 'Century Gothic';
-      box-shadow: -5px 0px 7px rgba(0, 0, 0, 0.1);
+      background-color: #31393C;
+      font-size: 18px;
     }
 
     .btn-logout:hover {
-      background-color: #3379C7; 
+      background-color: #CCC7BF;
       transition: 0.7s;
+      color: #31393C;
     }
 
     .logo {

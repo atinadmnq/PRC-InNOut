@@ -223,10 +223,6 @@ $stmt->close();
   </div>
 </div>
 
-<div class="notes" style="margin-top: 20px;">
-  <strong>AWBR:</strong><br>
-  Flyer.
-</div>
 
 <div class="footer">
   ARD 14<br>

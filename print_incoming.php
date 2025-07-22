@@ -50,9 +50,8 @@ if (!$data) {
 
         .input-box {
             width: 100%;
-            height: 28px;
+            height: 40px;
             border: none;
-            border-bottom: 1px solid #000;
             background: transparent;
         }
 
@@ -76,15 +75,12 @@ if (!$data) {
         }
 
         @media print {
-            .no-print {
-                display: none;
-            }
-            .input-box {
-                display: none;
-            }
             .output {
                 display: block !important;
             }
+            .no-print {
+            display: none !important;
+        }
         }
     </style>
 </head>
