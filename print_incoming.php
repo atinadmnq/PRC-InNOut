@@ -1,33 +1,49 @@
 <?php
 include 'db_connect.php';
 
-if (!isset($_GET['id'])) {
-    die("Missing ID parameter.");
+if (!isset($_POST['selected_ids']) || !is_array($_POST['selected_ids'])) {
+    die("No records selected.");
 }
 
-$id = intval($_GET['id']);
-$stmt = $conn->prepare("SELECT * FROM incoming WHERE id = ?");
-$stmt->bind_param("i", $id);
+$ids = array_map('intval', $_POST['selected_ids']);
+$placeholders = implode(',', array_fill(0, count($ids), '?'));
+$types = str_repeat('i', count($ids));
+
+$stmt = $conn->prepare("SELECT * FROM incoming WHERE id IN ($placeholders)");
+$stmt->bind_param($types, ...$ids);
 $stmt->execute();
 $result = $stmt->get_result();
-$data = $result->fetch_assoc();
 
-if (!$data) {
-    die("No record found.");
+$slips = [];
+while ($row = $result->fetch_assoc()) {
+    $slips[] = $row;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Route Slip - <?= htmlspecialchars($data['trackingNum']) ?></title>
+    <title>Print Route Slips</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Century Gothic';
             padding: 60px;
             font-size: 16px;
+        }
+
+        .slip-wrapper {
+            page-break-after: always;
+            margin-bottom: 60px;
+}
+
+        .slip {
+            width: 100%;
+            border: 1px solid #000;
+            padding: 20px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
         }
 
         .doc-table {
@@ -50,15 +66,11 @@ if (!$data) {
 
         .input-box {
             width: 100%;
-            height: 40px;
             border: none;
             background: transparent;
         }
 
         textarea.input-box {
-            width: 100%;
-            height: 100%;
-            border: none;
             resize: none;
             background: transparent;
         }
@@ -71,105 +83,127 @@ if (!$data) {
         .footer {
             font-size: 12px;
             text-align: right;
-            padding-top: 40px;
+            padding-top: 20px;
         }
 
         @media print {
-            .output {
+            .input-box,
+            .no-print {
                 display: none !important;
             }
-            .no-print {
-            display: none !important;
+
+            .output {
+                display: block !important;
+            }
+
+            .slip-wrapper {
+                page-break-inside: avoid;
+            }
         }
+
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .logo-header img {
+            height: 60px;
         }
     </style>
 </head>
 <body>
 
-
-<div class="d-flex align-items-center justify-content-between mb-4" style="border: 1px solid black; padding: 10px;">
-    <div style="flex: 0 0 auto;">
-        <img src="prcLogo.png" alt="PRC Logo" style="height: 80px; width: 80px; object-fit: contain;">
-    </div>
-    <div style="flex: 1; text-align: center;">
-        <div style="font-weight: bold; font-size: 18px;">Professional Regulation Commission</div>
-        <div style="font-weight: bold; font-size: 16px;">ROUTE SLIP</div>
-    </div>
-    <div style="flex: 0 0 auto; width: 80px;"></div>
-</div>
-
-<form id="printForm">
-<table class="doc-table">
-    <tr>
-        <td class="label">Reference No.</td>
-        <td colspan="3"><?= htmlspecialchars($data['trackingNum']) ?></td>
-    </tr>
-    <tr>
-        <td class="label">Subject</td>
-        <td colspan="3"><?= htmlspecialchars($data['subj']) ?></td>
-    </tr>
-    <tr>
-        <td class="label">Received By</td>
-        <td><?= htmlspecialchars($data['recipient']) ?></td>
-        <td class="label">Source/Origin</td>
-        <td><?= htmlspecialchars($data['source']) ?></td>
-    </tr>
-    <tr>
-        <td class="label">Date Received</td>
-        <td colspan="3"><?= htmlspecialchars($data['dateRecd']) ?></td>
-    </tr>
-    <tr>
-        <td class="label">Attachment</td>
-        <td colspan="3"><?= htmlspecialchars($data['attachment']) ?></td>
-    </tr>
-
-   
-    <tr>
-        <td class="label"><strong>TO</strong></td>
-        <td colspan="3" class="label"><strong>ACTION REQUIRED / REMARKS</strong></td>
-    </tr>
-
-   
-    <tr>
-        <td><input type="text" class="form-control input-box" id="to1"><div class="output" id="to1_out"></div></td>
-        <td colspan="3" rowspan="3">
-            <textarea class="form-control input-box" id="remarks" rows="5"></textarea>
-            <div class="output" id="remarks_out"></div>
-        </td>
-    </tr>
-    <tr>
-        <td><input type="text" class="form-control input-box" id="to2"><div class="output" id="to2_out"></div></td>
-    </tr>
-    <tr>
-        <td><input type="text" class="form-control input-box" id="to3"><div class="output" id="to3_out"></div></td>
-    </tr>
-</table>
-</form>
-
-<div class="footer">
-    BAG-ORD-01<br>
-    Rev.0<br>
-    May 24, 201<br> 
-    Page 1 of 1 
-</div>
-
-<div class="no-print mt-4">
-    <button type="button" class="btn btn-primary" onclick="prepareAndPrint()">🖨️ Print</button>
+<div class="no-print text-end mb-4">
+    <button class="btn btn-primary" onclick="prepareAndPrint()">🖨️ Print All</button>
     <a href="incoming_table.php" class="btn btn-secondary">🔙 Back</a>
 </div>
 
+<form id="multiPrintForm">
+<?php for ($i = 0; $i < count($slips); $i += 2): ?>
+<div class="slip-wrapper">
+    <?php for ($j = $i; $j < $i + 2 && $j < count($slips); $j++):
+        $data = $slips[$j];
+        $uid = "slip_" . $data['id']; ?>
+    <div class="slip">
+        <div class="logo-header">
+            <img src="prcLogo.png" alt="PRC Logo">
+            <div style="text-align: center; flex: 1;">
+                <div style="font-weight: bold; font-size: 18px;">Professional Regulation Commission</div>
+                <div style="font-weight: bold; font-size: 16px;">ROUTE SLIP</div>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+
+        <table class="doc-table">
+            <tr>
+                <td class="label">Reference No.</td>
+                <td colspan="3"><?= htmlspecialchars($data['trackingNum']) ?></td>
+            </tr>
+            <tr>
+                <td class="label">Subject</td>
+                <td colspan="3"><?= htmlspecialchars($data['subj']) ?></td>
+            </tr>
+            <tr>
+                <td class="label">Received By</td>
+                <td><?= htmlspecialchars($data['recipient']) ?></td>
+                <td class="label">Source/Origin</td>
+                <td><?= htmlspecialchars($data['source']) ?></td>
+            </tr>
+            <tr>
+                <td class="label">Date Received</td>
+                <td colspan="3"><?= htmlspecialchars($data['dateRecd']) ?></td>
+            </tr>
+            <tr>
+                <td class="label">Attachment</td>
+                <td colspan="3"><?= htmlspecialchars($data['attachment']) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><strong>TO</strong></td>
+                <td colspan="3" class="label"><strong>ACTION REQUIRED / REMARKS</strong></td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="text" class="form-control input-box" id="<?= $uid ?>_to1">
+                    <div class="output" id="<?= $uid ?>_to1_out"></div>
+                </td>
+                <td colspan="3" rowspan="3">
+                    <textarea class="form-control input-box" id="<?= $uid ?>_remarks" rows="5"></textarea>
+                    <div class="output" id="<?= $uid ?>_remarks_out"></div>
+                </td>
+            </tr>
+            <tr><td><input type="text" class="form-control input-box" id="<?= $uid ?>_to2"><div class="output" id="<?= $uid ?>_to2_out"></div></td></tr>
+            <tr><td><input type="text" class="form-control input-box" id="<?= $uid ?>_to3"><div class="output" id="<?= $uid ?>_to3_out"></div></td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+            BAG-ORD-01<br>
+            Rev.0<br>
+            May 24, 2019<br>
+            Page 1 of 1
+    </div>
+    <?php endfor; ?>
+</div>
+<?php endfor; ?>
+</form>
+
 <script>
-    function prepareAndPrint() {
+function prepareAndPrint() {
+    const ids = <?= json_encode(array_column($slips, 'id')) ?>;
+    ids.forEach(id => {
+        const uid = `slip_${id}`;
         for (let i = 1; i <= 3; i++) {
-            const toVal = document.getElementById(`to${i}`).value;
-            document.getElementById(`to${i}_out`).textContent = toVal;
+            const val = document.getElementById(`${uid}_to${i}`).value;
+            document.getElementById(`${uid}_to${i}_out`).textContent = val;
         }
+        const remarksVal = document.getElementById(`${uid}_remarks`).value;
+        document.getElementById(`${uid}_remarks_out`).textContent = remarksVal;
+    });
 
-        const remarksVal = document.getElementById('remarks').value;
-        document.getElementById('remarks_out').textContent = remarksVal;
-
-        window.print();
-    }
+    window.print();
+}
 </script>
 
 </body>

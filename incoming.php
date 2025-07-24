@@ -29,6 +29,12 @@ function logActivity($conn) {
             $stat, $actionUnit, $dateRel, $recipient, $intial, $trackingNum
         );
 
+        $log_stmt = $conn->prepare("INSERT INTO activity_logs (action_type, reference_no, description) VALUES (?, ?, ?)");
+        $action_type = "incoming";
+        $description = "New Incoming Mail Added.";
+        $log_stmt->bind_param("sss", $action_type, $CtrlNum, $description);
+        $log_stmt->execute();
+
         if ($stmt->execute()) {
             echo "<script>alert('Data inserted successfully');</script>";
         } else {

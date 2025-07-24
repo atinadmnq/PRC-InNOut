@@ -22,6 +22,7 @@
       background-color: #31393C;
       padding-top: 20px;
       font-family: 'Century Gothic';
+      font-weight: bold;
     }
 
     .sidebar a {
@@ -51,7 +52,7 @@
     }
 
     .btn-logout {
-      color: #ffffffff; 
+      color: #DB0F27; 
       padding: 7px 0px;
       border: none;
       margin-top: 20px;
@@ -59,6 +60,7 @@
       font-family: 'Century Gothic';
       background-color: #31393C;
       font-size: 18px;
+      font-weight: bold;
     }
 
     .btn-logout:hover {
@@ -75,7 +77,7 @@
     }
 
     .brand-text {
-      font-size: 20px;
+      font-size: 25px;
       text-align: center;
       color: #FFFFFF;
       margin-bottom: 1rem;
@@ -113,13 +115,14 @@
     <img src="prcLogo.png" alt="Logo" class="logo" />
     <div class="brand-text">IN-n-OUT</div>
 
+    <a href="dashboard.php">Dashboard</a>
     <a href="incoming.php">Incoming</a>
     <a href="outgoing.php">Outgoing</a>
     <a href="register_user.php">Register User</a>
     <a href="view_data.php">View Data</a>
 
     <form id="logoutForm" action="logout.php" method="post" class="mt-auto">
-      <button type="button" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</button>
+      <button type="button" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">LOGOUT</button>
     </form>
   </div>
 

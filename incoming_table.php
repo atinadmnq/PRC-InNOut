@@ -2,43 +2,12 @@
 include 'db_connect.php';
 include 'navbar.php';
 
-$limit = 20; 
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $limit;
+$search = isset($_POST['search']) ? $_POST['search'] : '';
 
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$searchQuery = "";
-$params = [];
-$types = "";
-
-if (!empty($search)) {
-    $searchQuery = "WHERE ctrlNum LIKE ? OR source LIKE ? OR subj LIKE ? OR recipient LIKE ?";
-    $searchTerm = "%$search%";
-    $params = [$searchTerm, $searchTerm, $searchTerm, $searchTerm];
-    $types = "ssss";
-}
-
-$countSQL = "SELECT COUNT(*) as total FROM incoming $searchQuery";
-$stmt = $conn->prepare($countSQL);
-if (!empty($searchQuery)) {
-    $stmt->bind_param($types, ...$params);
-}
-$stmt->execute();
-$countResult = $stmt->get_result()->fetch_assoc();
-$totalRows = $countResult['total'];
-$totalPages = ceil($totalRows / $limit);
-$stmt->close();
-
-$dataSQL = "SELECT * FROM incoming $searchQuery ORDER BY dateRecd DESC LIMIT ? OFFSET ?";
-$stmt = $conn->prepare($dataSQL);
-if (!empty($searchQuery)) {
-    $types .= "ii";
-    $params[] = $limit;
-    $params[] = $offset;
-    $stmt->bind_param($types, ...$params);
-} else {
-    $stmt->bind_param("ii", $limit, $offset);
-}
+$sql = "SELECT * FROM incoming WHERE trackingNum LIKE ? OR subj LIKE ? OR source LIKE ? ORDER BY id DESC";
+$stmt = $conn->prepare($sql);
+$searchParam = "%$search%";
+$stmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -46,119 +15,132 @@ $result = $stmt->get_result();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Incoming Data Table</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+  <meta charset="UTF-8">
+  <title>Incoming Documents</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
     body {
-        background-color: #EDEEEB; 
-        color: #31393C; 
-        font-family: 'Century Gothic';
-        margin-left: 250px;
+      font-family: 'Century Gothic';
+      padding: 40px;
+      margin-left: 250px;
     }
-
-    .table-container {
-        margin: 2rem auto;
-        background-color: #FFFFFF; 
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 0 10px rgba(49, 57, 60, 0.1); 
+    th, td {
+      font-size: 13px;
+      vertical-align: middle;
     }
-
-    .table th {
-        vertical-align: middle;
-        background-color: #3E96F4; 
-        color: #FFFFFF; 
+    table {
+      background-color: #fff;
     }
-
-    .search-box {
-        margin-bottom: 1rem;
+    .table-wrapper {
+      background-color: #EDEEEB;
+      padding: 20px;
+      border-radius: 10px;
     }
-
-    .pagination .page-link {
-        color: #3E96F4; 
+    .search-box input {
+      font-size: 13px;
     }
-
-    .pagination .active .page-link {
-        background-color: #3E96F4; 
-        border-color: #3E96F4;
-        color: #FFFFFF; 
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
     }
-
-    .action-buttons a {
-        margin-right: 4px;
-    }
-    </style>
+  </style>
 </head>
 <body>
-<div class="container table-container shadow border">
-    <h4 class="mb-4 text-center fw-bold">Incoming Mail Records</h4>
 
-    <form method="get" class="search-box d-flex justify-content-end">
-        <input type="text" name="search" class="form-control w-25 me-2" placeholder="Search..." value="<?= htmlspecialchars($search) ?>">
-        <button type="submit" class="btn btn-outline-dark">Search</button>
-    </form>
+<div class="container table-wrapper shadow border">
+  <h4 class="text-center mb-4 fw-bold">INCOMING DOCUMENTS</h4>
 
-    <div class="table-responsive text-center">
-        <table class="table table-bordered table-striped align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Control No.</th>
-                    <th>Source</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Subject</th>
-                    <th>Attachment</th>
-                    <th>Status</th>
-                    <th>Action Unit</th>
-                    <th>Release Date</th>
-                    <th>Recipient</th>
-                    <th>Receiver Initial</th>
-                    <th>Tracking No.</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while($row = $result->fetch_assoc()): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($row['ctrlNum']) ?></td>
-                            <td><?= htmlspecialchars($row['source']) ?></td>
-                            <td><?= htmlspecialchars($row['dateRecd']) ?></td>
-                            <td><?= htmlspecialchars($row['timeRe']) ?></td>
-                            <td><?= htmlspecialchars($row['subj']) ?></td>
-                            <td><?= htmlspecialchars($row['attachment']) ?></td>
-                            <td><?= htmlspecialchars($row['stat']) ?></td>
-                            <td><?= htmlspecialchars($row['actionUnit']) ?></td>
-                            <td><?= htmlspecialchars($row['dateRel']) ?></td>
-                            <td><?= htmlspecialchars($row['recipient']) ?></td>
-                            <td><?= htmlspecialchars($row['intial']) ?></td>
-                            <td><?= htmlspecialchars($row['trackingNum']) ?></td>
-                            <td class="text-nowrap action-buttons">
-                                <a href="print_incoming.php?id=<?= $row['id'] ?>" class="btn btn-outline-primary btn-sm">Print</a>
-                                <a href="edit_incoming.php?id=<?= $row['id'] ?>" class="btn btn-outline-success btn-sm">Edit</a>
-                                <a href="delete_incoming.php?id=<?= $row['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this record?');">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr><td colspan="13" class="text-center">No records found.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+  <form method="POST" id="printForm" target="_blank">
+    <div class="search-box d-flex justify-content-end mb-3">
+      <input type="text" name="search" class="form-control w-25 me-2" placeholder="Search..." value="<?= htmlspecialchars($search) ?>">
+      <button type="submit" formaction="" class="btn btn-outline-dark me-2">Search</button>
+      <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#printModal">Print</button>
     </div>
 
-    <?php if ($totalRows > 0): ?>
-        <nav>
-            <ul class="pagination justify-content-center">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                        <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>"><?= $i ?></a>
-                    </li>
-                <?php endfor; ?>
-            </ul>
-        </nav>
-    <?php endif; ?>
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th><input type="checkbox" id="select-all"></th>
+            <th>Control Number</th>
+            <th>Source</th>
+            <th>Date Received</th>
+            <th>Received By</th>
+            <th>Subject</th>
+            <th>Action Unit</th>
+            <th>Released To</th>
+            <th>Date</th>
+            <th>Tracking Number</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+              <td><input type="checkbox" name="selected_ids[]" value="<?= $row['id'] ?>"></td>
+              <td><?= htmlspecialchars($row['ctrlNum']) ?></td>
+              <td><?= htmlspecialchars($row['source']) ?></td>
+              <td><?= htmlspecialchars($row['dateRecd']) ?></td>
+              <td><?= htmlspecialchars($row['recipient']) ?></td>
+              <td><?= htmlspecialchars($row['subj']) ?></td>
+              <td><?= htmlspecialchars($row['actionUnit']) ?></td>
+              <td><?= htmlspecialchars($row['recipient']) ?></td>
+              <td><?= htmlspecialchars($row['dateRel']) ?></td>
+              <td><?= htmlspecialchars($row['trackingNum']) ?></td>
+              <td>
+                <div class="action-buttons">
+                  <a href="edit_incoming.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-warning">Edit</a>
+                  <a href="delete_incoming.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                </div>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
+  </form>
 </div>
+
+
+<div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="printModalLabel">Select Print Format</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Please choose the format you want to use:</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button type="button" class="btn btn-outline-primary" onclick="submitPrint('print_incoming.php')">🧾 Route Slip</button>
+          <button type="button" class="btn btn-outline-success" onclick="submitPrint('print_incoming_log.php')">📦 Parcel Log</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('select-all').addEventListener('change', function () {
+    const checkboxes = document.querySelectorAll('input[name="selected_ids[]"]');
+    checkboxes.forEach(cb => cb.checked = this.checked);
+  });
+
+  function submitPrint(actionUrl) {
+    const selected = document.querySelectorAll('input[name="selected_ids[]"]:checked');
+    if (selected.length === 0) {
+      alert("Please select at least one row to print.");
+      return;
+    }
+
+    const form = document.getElementById('printForm');
+    form.action = actionUrl;
+    form.submit();
+  }
+</script>
+
 </body>
 </html>

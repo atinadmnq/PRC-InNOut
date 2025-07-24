@@ -97,7 +97,7 @@ $result = $stmt->get_result();
 </head>
 <body>
   <div class="table-wrapper shadow border">
-    <h4 class="text-center mb-4 fw-bold">Outgoing Mail Records</h4>
+    <h4 class="text-center mb-4 fw-bold">OUTGOING MAIL RECORDS</h4>
 
     <form method="POST" action="print_outgoing.php" target="_blank">
       <div class="search-bar d-flex justify-content-end mb-3">

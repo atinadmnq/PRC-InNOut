@@ -233,7 +233,7 @@ $stmt->close();
 
 <div class="no-print mt-4">
     <button type="button" class="btn btn-primary" onclick="prepareAndPrint()">🖨️ Print</button>
-    <a href="incoming_table.php" class="btn btn-secondary">🔙 Back</a>
+    <a href="outgoing_table.php" class="btn btn-secondary">🔙 Back</a>
 </div>
 
 <script>

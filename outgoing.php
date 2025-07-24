@@ -21,6 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare("INSERT INTO outgoing (date_received, control_number, division_section, contents, contact_person, designation, package_type, pieces) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("sssssssi", $date, $ctrlNum, $sec, $content, $contact_person, $designation, $pType, $pieces);
 
+    $log_stmt = $conn->prepare("INSERT INTO activity_logs (action_type, reference_no, description) VALUES (?, ?, ?)");
+    $action_type = "outgoing";
+    $description = "New Outgoing Mail Added.";
+    $log_stmt->bind_param("sss", $action_type, $ctrlNum, $description);
+    $log_stmt->execute();
+
     if ($stmt->execute()) {
         echo "<div class='alert alert-success'>Data saved successfully!</div>";
     } else {
