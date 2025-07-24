@@ -1,6 +1,6 @@
 <?php
 include 'db_connect.php';
-include 'navbar.php';
+include 'sidebar.php';
 
 
 $incoming = $conn->query("SELECT COUNT(*) AS total FROM incoming")->fetch_assoc()['total'];
@@ -40,6 +40,8 @@ $logs = $conn->query("SELECT * FROM activity_logs ORDER BY id DESC LIMIT 5");
             justify-content: center;
             font-size: 24px;
         }
+
+        
     </style>
 </head>
 <body>
@@ -85,9 +87,20 @@ $logs = $conn->query("SELECT * FROM activity_logs ORDER BY id DESC LIMIT 5");
                     </li>
                 <?php endwhile; ?>
             <?php else: ?>
-                <li class="list-group-item text-muted">No recent activity.</li>
+                <li class="list-group-item text-muted">No Recent Activity</li>
             <?php endif; ?>
         </ul>
+    </div>
+    <br> <br>
+    
+    <h5>⚡ Quick Actions</h5>
+    <div class="quick-actions d-flex gap-3">
+        <a href="incoming_table.php" class="btn btn-outline-primary">
+            <i class="bi bi-box-arrow-in-down me-1"></i> View Incoming Records
+        </a>
+        <a href="outgoing_table.php" class="btn btn-outline-success">
+            <i class="bi bi-box-arrow-up-right me-1"></i> View Outgoing Records
+        </a>
     </div>
 </div>
 </body>

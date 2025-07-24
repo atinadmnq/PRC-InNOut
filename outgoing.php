@@ -1,6 +1,6 @@
 <?php
 include 'db_connect.php';
-include 'navbar.php';
+include 'sidebar.php';
 
 $regional_offices = [];
 $result = $conn->query("SELECT * FROM contents");
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
   <div class="form-wrapper shadow border">
-    <h4 class="mb-4 fw-bold text-center">OUTGOING MAILS</h4>
+    <h3 class="mb-4 fw-bold text-center">OUTGOING MAILS</h3>
     <form method="POST" action="">
       <div class="mb-3">
         <label for="date" class="form-label">Date Received</label>

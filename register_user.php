@@ -1,6 +1,6 @@
 <?php
 include 'db_connect.php'; 
-include 'navbar.php'; 
+include 'sidebar.php';
 
 $username = $email = $password = "";
 $errors = [];

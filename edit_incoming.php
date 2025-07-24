@@ -1,5 +1,6 @@
 <?php
 include 'db_connect.php';
+include 'sidebar.php';
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
@@ -67,13 +68,14 @@ if (!$data) {
             color: #31393C;
             font-family: 'Century Gothic';
             padding: 2rem;
+            margin-left: 250px;
         }
 
         .form-container {
             background-color: #FFFFFF;
             padding: 2rem;
             border-radius: 1rem;
-            max-width: 600px;
+            max-width: 800px;
             margin: auto;
             box-shadow: 0 0 10px rgba(49, 57, 60, 0.1);
         }

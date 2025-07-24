@@ -1,6 +1,6 @@
 <?php
 include 'db_connect.php';
-include 'navbar.php';
+include 'sidebar.php';
 
 $limit = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;

@@ -1,6 +1,6 @@
 <?php
 include 'db_connect.php';
-include 'navbar.php'; 
+include 'sidebar.php'; 
 
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       font-family: 'Century Gothic', sans-serif;
       color: #31393C;
       margin-left: 250px;
+      padding: 2rem;
     }
 
     .card {
@@ -70,16 +71,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       border: 1px solid #CCC7BF;
       border-radius: 1rem;
       padding: 2rem;
+      max-width: 800px;
+      margin: auto;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    h4 {
+    h3 {
       font-weight: bold;
-      color: #31393C;
+      color: #3E96F4;
     }
 
     label {
-      font-weight: 500;
+      font-weight: bold;
       color: #31393C;
     }
 
@@ -114,12 +117,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       border-color: #b3afa7;
       color: #FFFFFF;
     }
+
   </style>
 </head>
 <body>
   <div class="container mt-5">
     <div class="card shadow p-4">
-      <h4 class="mb-4 fw-bold text-center">Edit Outgoing Mail</h4>
+      <h3 class="mb-4 fw-bold text-center">EDIT OUTGOING MAIL</h3>
       <form method="POST">
         <div class="mb-3">
           <label for="date" class="form-label">Date Received</label>
@@ -180,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             value="<?= htmlspecialchars($data['pieces']) ?>" required>
         </div>
 
-        <div class="d-flex justify-content-between">
+        <div class="text-end">
           <button type="submit" class="btn btn-success">Update</button>
           <a href="outgoing_table.php" class="btn btn-secondary">Cancel</a>
         </div>
