@@ -24,113 +24,133 @@ $stmt->close();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body {
-        font-family: "Century Gothic";
-        font-size: 12px;
-        margin: 40px;
-    }
+  body {
+      font-family: "Century Gothic";
+      font-size: 12px;
+      margin: 40px;
+  }
 
-    .header-table {
-        width: 100%;
-        margin-bottom: 10px;
-    }
+  .header-table {
+      width: 100%;
+      margin-bottom: 10px;
+  }
 
-    .logo-placeholder {
-        width: 80px;
-        height: 80px;
-        border: 1px solid #000;
-        text-align: center;
-        vertical-align: middle;
-        font-size: 10px;
-        font-weight: bold;
-    }
+  .logo-placeholder {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #000;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 10px;
+      font-weight: bold;
+  }
 
-    .center-text {
-        text-align: center;
-    }
+  .center-text {
+      text-align: center;
+  }
 
-    .underline {
-        text-decoration: underline;
-    }
+  .underline {
+      text-decoration: underline;
+  }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 12px;
-        table-layout: fixed;
-    }
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      table-layout: fixed;
+  }
 
-    th, td {
-        border: 1px solid #000;
-        padding: 6px;
-        vertical-align: top;
-    }
+  th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      vertical-align: top;
+  }
 
-    th {
-        background-color: #f0f0f0;
-        text-align: center;
-    }
+  th {
+      background-color: #f0f0f0;
+      text-align: center;
+  }
 
-    .divider-row td {
-        font-weight: bold;
-        background-color: #f9f9f9;
-        text-align: left;
-    }
+  .divider-row td {
+      font-weight: bold;
+      background-color: #f9f9f9;
+      text-align: left;
+  }
 
-    .total-row td {
-        font-weight: bold;
-        text-align: right;
-    }
+  .total-row td {
+      font-weight: bold;
+      text-align: right;
+  }
 
-    .notes, .signature-block {
-        margin-top: 20px;
-    }
+  .notes, .signature-block {
+      margin-top: 20px;
+  }
 
-    .signature-block div {
-        margin-top: 40px;
-    }
+  .signature-block div {
+      margin-top: 40px;
+  }
 
-    .checkbox {
-        width: 14px;
-        height: 14px;
-        border: 1px solid #000;
-        display: inline-block;
-    }
+  .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #000;
+      display: inline-block;
+  }
 
-    .input-box {
-        border: none;
-        border-bottom: 1px solid #000;
-        width: 100%;
-        font-family: "Century Gothic";
-    }
+  .input-box {
+      border: none;
+      border-bottom: 1px solid #000;
+      width: 100%;
+      font-family: "Century Gothic";
+  }
 
-    @media print {
-        .output {
-            display: block;
-        }
+  .output {
+      display: none;
+      white-space: pre-wrap;
+      font-family: "Century Gothic";
+  }
 
-        .no-print {
-            display: none !important;
-        }
-    }
+  .footer {
+      margin-top: 50px;
+      font-size: 11px;
+      text-align: right;
+      float: right;
+  }
 
-    .output {
-        display: none;
-        white-space: pre-wrap;
-        font-family: "Century Gothic";
-    }
+  .no-break {
+      white-space: nowrap;
+  }
 
-    .footer {
-        margin-top: 50px;
-        font-size: 11px;
-        text-align: right;
-        float: right;
-    }
+  .no-print {
+      display: block;
+  }
 
-    .no-break {
-        white-space: nowrap;
-    }
-  </style>
+  @media print {
+      body {
+          margin: 0;
+          padding: 0;
+      }
+
+      .no-print {
+          display: none !important;
+      }
+
+      .output {
+          display: block;
+      }
+
+      .footer {
+          position: running(footer);
+          font-size: 11px;
+          text-align: right;
+      }
+
+      table, tr, td, th {
+          page-break-inside: avoid !important;
+      }
+  }
+</style>
+
 </head>
 <body>
 
@@ -223,12 +243,11 @@ $stmt->close();
   </div>
 </div>
 
-
-<div class="footer">
+<div class="footer" id="footer">
   ARD 14<br>
   Rev.01<br>
   November 03, 2017<br>
-  Page 1 of 1
+  Page <span id="pageNumber">1</span> of <span id="totalPages">1</span>
 </div>
 
 <div class="no-print mt-4">
@@ -238,7 +257,6 @@ $stmt->close();
 
 <script>
 function prepareAndPrint() {
-   
     document.querySelectorAll('input[id^="to"]').forEach(input => {
         const output = document.getElementById(input.id + '_out');
         if (output) {
@@ -246,14 +264,25 @@ function prepareAndPrint() {
         }
     });
 
-    
     const ctrlNum = document.getElementById('ctrlNum');
     const ctrlNumOut = document.getElementById('ctrlNum_out');
     if (ctrlNum && ctrlNumOut) {
         ctrlNumOut.textContent = ctrlNum.value;
     }
 
-    window.print();
+    setTimeout(() => {
+        updatePageNumbers();
+        window.print();
+    }, 100);
+}
+
+function updatePageNumbers() {
+    const totalHeight = document.body.scrollHeight;
+    const pageHeight = 1123; // Approximate height of an A4 page at 96 DPI
+    const totalPages = Math.ceil(totalHeight / pageHeight);
+
+    document.getElementById("pageNumber").textContent = 1; // always page 1 for static HTML
+    document.getElementById("totalPages").textContent = totalPages;
 }
 </script>
 

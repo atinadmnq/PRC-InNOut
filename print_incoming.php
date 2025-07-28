@@ -18,6 +18,7 @@ $slips = [];
 while ($row = $result->fetch_assoc()) {
     $slips[] = $row;
 }
+$totalPages = ceil(count($slips) / 2);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,13 +30,8 @@ while ($row = $result->fetch_assoc()) {
         body {
             font-family: 'Century Gothic';
             padding: 60px;
-            font-size: 16px;
+            font-size: 12px;
         }
-
-        .slip-wrapper {
-            page-break-after: always;
-            margin-bottom: 60px;
-}
 
         .slip {
             width: 100%;
@@ -80,14 +76,17 @@ while ($row = $result->fetch_assoc()) {
             white-space: pre-wrap;
         }
 
+        .page-wrapper {
+            page-break-after: always;
+        }
+
         .footer {
-            font-size: 12px;
+            font-size: 8px;
             text-align: right;
             padding-top: 20px;
         }
 
         @media print {
-            .input-box,
             .no-print {
                 display: none !important;
             }
@@ -96,7 +95,7 @@ while ($row = $result->fetch_assoc()) {
                 display: block !important;
             }
 
-            .slip-wrapper {
+            .page-wrapper {
                 page-break-inside: avoid;
             }
         }
@@ -121,8 +120,11 @@ while ($row = $result->fetch_assoc()) {
 </div>
 
 <form id="multiPrintForm">
-<?php for ($i = 0; $i < count($slips); $i += 2): ?>
-<div class="slip-wrapper">
+<?php
+$page = 1;
+for ($i = 0; $i < count($slips); $i += 2):
+?>
+<div class="page-wrapper">
     <?php for ($j = $i; $j < $i + 2 && $j < count($slips); $j++):
         $data = $slips[$j];
         $uid = "slip_" . $data['id']; ?>
@@ -177,16 +179,16 @@ while ($row = $result->fetch_assoc()) {
             <tr><td><input type="text" class="form-control input-box" id="<?= $uid ?>_to3"><div class="output" id="<?= $uid ?>_to3_out"></div></td></tr>
         </table>
     </div>
+    <?php endfor; ?>
 
     <div class="footer">
-            BAG-ORD-01<br>
-            Rev.0<br>
-            May 24, 2019<br>
-            Page 1 of 1
+        BAG-ORD-01<br>
+        Rev.0<br>
+        May 24, 2019<br>
+        Page <?= $page ?> of <?= $totalPages ?>
     </div>
-    <?php endfor; ?>
 </div>
-<?php endfor; ?>
+<?php $page++; endfor; ?>
 </form>
 
 <script>

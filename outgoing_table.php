@@ -7,27 +7,48 @@ $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
 $search = $_GET['search'] ?? '';
+$filterMonth = $_GET['month'] ?? '';
+$filterYear = $_GET['year'] ?? '';
+
 $searchSQL = "";
+$where = [];
 $params = [];
 $types = "";
 
+// Search conditions
 if (!empty($search)) {
-    $searchSQL = "WHERE control_number LIKE ? OR division_section LIKE ? OR contents LIKE ? OR contact_person LIKE ? OR designation LIKE ? OR package_type LIKE ?";
+    $where[] = "(control_number LIKE ? OR division_section LIKE ? OR contents LIKE ? OR contact_person LIKE ? OR designation LIKE ? OR package_type LIKE ?)";
     $term = "%$search%";
-    $params = [$term, $term, $term, $term, $term, $term];
-    $types = "ssssss";
+    $params = array_merge($params, [$term, $term, $term, $term, $term, $term]);
+    $types .= "ssssss";
 }
 
+// Month/year filter
+if (!empty($filterMonth)) {
+    $where[] = "MONTH(date_received) = ?";
+    $params[] = $filterMonth;
+    $types .= "i";
+}
+if (!empty($filterYear)) {
+    $where[] = "YEAR(date_received) = ?";
+    $params[] = $filterYear;
+    $types .= "i";
+}
+
+if (!empty($where)) {
+    $searchSQL = "WHERE " . implode(" AND ", $where);
+}
+
+// Count total for pagination
 $countSQL = "SELECT COUNT(*) as total FROM outgoing $searchSQL";
 $stmt = $conn->prepare($countSQL);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
+if (!empty($params)) $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $totalRows = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 $totalPages = max(1, ceil($totalRows / $limit));
 
+// Fetch paginated results
 $dataSQL = "SELECT * FROM outgoing $searchSQL ORDER BY date_received DESC LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($dataSQL);
 if (!empty($params)) {
@@ -99,11 +120,31 @@ $result = $stmt->get_result();
   <div class="table-wrapper shadow border">
     <h4 class="text-center mb-4 fw-bold">OUTGOING MAIL RECORDS</h4>
 
-    <form method="POST" action="print_outgoing.php" target="_blank">
-      <div class="search-bar d-flex justify-content-end mb-3">
-        <input type="text" name="search" class="form-control w-25 me-2" placeholder="Search..." value="<?= htmlspecialchars($search) ?>">
-        <button type="submit" formaction="" class="btn btn-outline-dark me-2">Search</button>
-        <button type="submit" class="btn btn-outline-primary">Print</button>
+    <form method="GET" action="">
+      <div class="search-bar d-flex justify-content-end mb-3 align-items-center flex-wrap gap-2">
+        <input type="text" name="search" class="form-control w-auto" placeholder="Search..." value="<?= htmlspecialchars($search) ?>">
+
+        <select name="month" class="form-select w-auto">
+          <option value="">All Months</option>
+          <?php for ($m = 1; $m <= 12; $m++): ?>
+            <option value="<?= $m ?>" <?= ($filterMonth == $m) ? 'selected' : '' ?>>
+              <?= date("F", mktime(0, 0, 0, $m, 10)) ?>
+            </option>
+          <?php endfor; ?>
+        </select>
+
+        <select name="year" class="form-select w-auto">
+          <option value="">All Years</option>
+          <?php
+          $yearNow = date("Y");
+          for ($y = $yearNow; $y >= $yearNow - 10; $y--): ?>
+            <option value="<?= $y ?>" <?= ($filterYear == $y) ? 'selected' : '' ?>><?= $y ?></option>
+          <?php endfor; ?>
+        </select>
+
+        <button type="submit" class="btn btn-outline-dark">Search</button>
+        <button type="submit" formaction="print_outgoing.php" formmethod="POST" target="_blank" class="btn btn-outline-primary">Print</button>
+        <a href="outgoing_table.php" class="btn btn-outline-secondary">Refresh</a>
       </div>
 
       <div class="table-responsive">
@@ -111,7 +152,7 @@ $result = $stmt->get_result();
           <thead>
             <tr>
               <th><input type="checkbox" id="select-all"></th>
-              <th>Date</th>
+              <th>Date Received</th>
               <th>Control No.</th>
               <th>Division/Section</th>
               <th>Contents</th>
@@ -154,7 +195,9 @@ $result = $stmt->get_result();
       <ul class="pagination justify-content-center">
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
           <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-            <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>"><?= $i ?></a>
+            <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&month=<?= urlencode($filterMonth) ?>&year=<?= urlencode($filterYear) ?>">
+              <?= $i ?>
+            </a>
           </li>
         <?php endfor; ?>
       </ul>
