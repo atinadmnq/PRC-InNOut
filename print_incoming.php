@@ -18,7 +18,6 @@ $slips = [];
 while ($row = $result->fetch_assoc()) {
     $slips[] = $row;
 }
-$totalPages = ceil(count($slips) / 2);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -122,6 +121,7 @@ $totalPages = ceil(count($slips) / 2);
 <form id="multiPrintForm">
 <?php
 $page = 1;
+$total = count($slips);
 for ($i = 0; $i < count($slips); $i += 2):
 ?>
 <div class="page-wrapper">
@@ -132,8 +132,9 @@ for ($i = 0; $i < count($slips); $i += 2):
         <div class="logo-header">
             <img src="prcLogo.png" alt="PRC Logo">
             <div style="text-align: center; flex: 1;">
-                <div style="font-weight: bold; font-size: 18px;">Professional Regulation Commission</div>
-                <div style="font-weight: bold; font-size: 16px;">ROUTE SLIP</div>
+                <div style="font-weight: bold; font-size: 18px;">PROFESSIONAL REGULATION COMMISSION</div>
+                <div style="font-weight: bold; font-size: 16px;">Cordillera Administrative Region</div>
+                <div style="font-weight: bold; font-size: 14px;">Route Slip</div>
             </div>
             <div style="width: 60px;"></div>
         </div>
@@ -178,17 +179,17 @@ for ($i = 0; $i < count($slips); $i += 2):
             <tr><td><input type="text" class="form-control input-box" id="<?= $uid ?>_to2"><div class="output" id="<?= $uid ?>_to2_out"></div></td></tr>
             <tr><td><input type="text" class="form-control input-box" id="<?= $uid ?>_to3"><div class="output" id="<?= $uid ?>_to3_out"></div></td></tr>
         </table>
-    </div>
-    <?php endfor; ?>
 
-    <div class="footer">
-        BAG-ORD-01<br>
-        Rev.0<br>
-        May 24, 2019<br>
-        Page <?= $page ?> of <?= $totalPages ?>
+        <div class="footer">
+            BAG-ORD-01<br>
+            Rev.0<br>
+            May 24, 2019<br>
+            Page <?= $page ?> of <?= $total ?>
+        </div>
     </div>
+    <?php $page++; endfor; ?>
 </div>
-<?php $page++; endfor; ?>
+<?php endfor; ?>
 </form>
 
 <script>
