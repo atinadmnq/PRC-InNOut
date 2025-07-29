@@ -132,9 +132,9 @@ for ($i = 0; $i < count($slips); $i += 2):
         <div class="logo-header">
             <img src="prcLogo.png" alt="PRC Logo">
             <div style="text-align: center; flex: 1;">
-                <div style="font-weight: bold; font-size: 18px;">PROFESSIONAL REGULATION COMMISSION</div>
+                <div style="font-weight: bold; font-size: 18px;">Professional Regulation Commission</div>
                 <div style="font-weight: bold; font-size: 16px;">Cordillera Administrative Region</div>
-                <div style="font-weight: bold; font-size: 14px;">Route Slip</div>
+                <div style="font-size: 16px;">ROUTE SLIP</div>
             </div>
             <div style="width: 60px;"></div>
         </div>
@@ -182,8 +182,8 @@ for ($i = 0; $i < count($slips); $i += 2):
 
         <div class="footer">
             BAG-ORD-01<br>
-            Rev.0<br>
-            May 24, 2019<br>
+            Rev.00<br>
+            May 24, 2018<br>
             Page <?= $page ?> of <?= $total ?>
         </div>
     </div>
