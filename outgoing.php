@@ -114,24 +114,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="content" class="form-label">Contents (Regional Office)</label>
         <select class="form-control" name="content" id="contentSelect" required>
           <option value="">-- Select Regional Office --</option>
-          <?php foreach ($regional_offices as $office): ?>
-            <option value="<?= htmlspecialchars($office['regional_office']) ?>"
-              data-contact="<?= htmlspecialchars($office['contact_person']) ?>"
-              data-designation="<?= htmlspecialchars($office['designation']) ?>">
-              <?= htmlspecialchars($office['regional_office']) ?>
-            </option>
-          <?php endforeach; ?>
+        <?php foreach ($regional_offices as $office): ?>
+          <option value="<?= htmlspecialchars($office['regional_office']) ?>"
+          data-contact="<?= htmlspecialchars($office['contact_person']) ?>"
+          data-designation="<?= htmlspecialchars($office['designation']) ?>">
+        <?= htmlspecialchars($office['regional_office']) ?>
+          </option>
+        <?php endforeach; ?>
         </select>
       </div>
 
       <div class="mb-3">
         <label for="contact_person" class="form-label">Contact Person</label>
-        <input type="text" class="form-control" id="contactPerson" name="contact_person" readonly>
+        <input type="text" class="form-control" name="contact_person" id="contactPerson">
       </div>
 
       <div class="mb-3">
         <label for="designation" class="form-label">Position</label>
-        <input type="text" class="form-control" id="designation" name="designation" readonly>
+        <input type="text" class="form-control" name="designation" id="designation">
       </div>
 
       <div class="mb-3">

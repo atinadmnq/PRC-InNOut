@@ -102,6 +102,7 @@ $stmt->close();
       border-bottom: 1px solid #000;
       width: 100%;
       font-family: "Century Gothic";
+      word-wrap: break-word;
   }
 
   .output {
@@ -123,6 +124,12 @@ $stmt->close();
 
   .no-print {
       display: block;
+  }
+
+  textarea.input-box {
+  overflow: hidden;     
+  resize: none;
+  height: 18px;     
   }
 
   @media print {
@@ -147,6 +154,10 @@ $stmt->close();
 
       table, tr, td, th {
           page-break-inside: avoid !important;
+      }
+
+      textarea::placeholder {
+          color: transparent !important;
       }
   }
 </style>
@@ -209,7 +220,7 @@ $stmt->close();
       <td>
         <?= htmlspecialchars($r['contact_person']) ?><br>
         <?= htmlspecialchars($r['designation']) ?><br>
-        <input type="text" class="input-box" id="to<?= $r['id'] ?>" placeholder="Type here…">
+        <textarea class="input-box auto-resize" id="to<?= $r['id'] ?>" placeholder="Type here…" oninput="autoResize(this)"></textarea>
         <div class="output" id="to<?= $r['id'] ?>_out"></div>
       </td>
       <td><?= htmlspecialchars($r['package_type']) ?></td>
@@ -284,7 +295,16 @@ function updatePageNumbers() {
     document.getElementById("pageNumber").textContent = 1; // always page 1 for static HTML
     document.getElementById("totalPages").textContent = totalPages;
 }
+
+function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
 </script>
+
+
+
 
 </body>
 </html>
